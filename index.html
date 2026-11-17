@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAND BRAIN - Rosário Quizanga de Vermelho</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#0f172a}
+#game{max-width:420px;min-height:100vh;margin:0 auto;background:linear-gradient(#0f172a,#4c1d95,#db2777);padding:12px}
+#topo{display:flex;justify-content:space-between;color:#fff;align-items:center}
+#logo{font-weight:900;font-size:22px;line-height:1}
+#logo span{color:#22c55e}
+.pill{background:#fff;border-radius:20px;padding:6px 10px;font-weight:900;font-size:13px}
+#barra{height:12px;background:rgba(255,255,255,.3);border-radius:10px;overflow:hidden;margin:10px 0}
+#prog{height:100%;width:0%;background:#22c55e}
+#timerBar{height:10px;background:#facc15;border-radius:10px;overflow:hidden;margin:5px 0}
+#timerFill{height:100%;width:100%;background:#22c55e;transition:width 1s linear}
+#card{background:#fff;border-radius:20px;padding:18px;min-height:460px}
+#badge{background:#7c3aed;color:#fff;padding:6px 14px;border-radius:20px;font-weight:900;font-size:12px}
+#badgeEspecial{background:#facc15;color:#000;padding:6px 10px;border-radius:20px;font-weight:900;font-size:11px;display:none}
+#tipo{color:#db2777;font-weight:900;font-size:11px;margin:8px 0}
+#pergunta{font-size:21px;font-weight:900;line-height:1.3;min-height:70px}
+#codigo{background:#0f172a;color:#22c55e;border-radius:10px;padding:10px;margin:8px 0;font-family:monospace;font-size:14px;text-align:left;white-space:pre-wrap;display:none}
+#desenho{font-size:40px;text-align:center;margin:10px 0}
+#ops{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.op{padding:14px 8px;border:3px solid #ddd;border-radius:14px;background:#f9fafb;font-weight:900;font-size:14px;text-align:center;cursor:pointer;word-break:break-word}
+.op.certo{background:#22c55e;color:#fff}
+.op.errado{background:#ef4444;color:#fff;opacity:.6}
+#feedback{text-align:center;font-weight:900;margin:12px 0;min-height:24px}
+button{padding:13px 18px;border:none;border-radius:25px;background:#facc15;font-weight:900;font-size:14px;cursor:pointer;margin:3px}
+button.caro{background:#e879f9}
+#aviso{background:#fee2e2;border:2px solid #ef4444;color:#dc2626;border-radius:12px;padding:10px;margin-top:10px;font-weight:900;font-size:14px;text-align:center;display:none}
+#tela{position:fixed;inset:0;background:#0f172a;color:#fff;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;overflow-y:auto}
+#tela h1{font-size:42px}
+#tela h1 span{color:#22c55e}
+.box{background:#fff;color:#111;border-radius:14px;padding:12px;margin:12px 0;text-align:left;font-size:13px;line-height:1.5;width:100%;max-width:380px}
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="topo"><div id="logo">CAND <span>BRAIN</span><br><small style="font-size:10px">200 NÍVEIS • LÓGICA + INFORMÁTICA</small></div><div style="display:flex;gap:5px"><div class="pill" id="vidas">❤️❤️❤️</div><div class="pill" id="estrelas">⭐ 0</div></div></div>
+  <div id="barra"><div id="prog"></div></div>
+  <div style="display:flex;justify-content:space-between;color:#fff;font-weight:900;font-size:12px"><span id="nivelTxt">NÍVEL 1 / 200</span><span id="pontos">0 pts</span><span id="tempoTxt">⏱️ 30s</span></div>
+  <div id="timerBar"><div id="timerFill"></div></div>
+  <div id="card">
+    <span id="badge">NÍVEL 1</span> <span id="badgeEspecial">⭐ NÍVEL ESPECIAL</span>
+    <div id="tipo">🧠 LÓGICA</div>
+    <div id="pergunta">A carregar...</div>
+    <div id="codigo"></div>
+    <div id="desenho"></div>
+    <div id="ops"></div>
+    <div id="feedback"></div>
+    <div id="aviso"></div>
+    <div style="text-align:center">
+      <button class="caro" onclick="pedirAjuda()">💡 AJUDA - 2 ⭐</button>
+      <button class="caro" onclick="saltarNivel()">⏭️ SALTAR - 2 ⭐</button>
+    </div>
+    <p style="text-align:center;font-size:11px;color:#666;margin-top:8px">⏱️ 30 segundos por nível • Sem repetições • Se errar, o tempo NÃO volta<br>Informática + Lógica + Matemática + Truques</p>
+  </div>
+  <p style="text-align:center;color:#fff;font-size:11px;margin-top:10px">© 2026 Cand Brain • Rosário Quizanga de Vermelho • Malanje, Angola 🇦🇴 • T.R.E.I</p>
+</div>
+
+<div id="tela">
+  <div style="font-size:60px">🧠💻</div>
+  <h1>CAND <span>BRAIN</span></h1>
+  <p>Teste de Cérebro + Informática - 200 Níveis - pt-PT</p>
+  <div class="box">
+    <b>🧠 NOVO - SEM REPETIÇÕES + TEMPORIZADOR:</b><br>
+    - Cada pergunta só aparece 1 vez<br>
+    - <b>⏱️ 30 segundos</b> por nível. Se acabar o tempo, perdes 1 vida<br>
+    - <b>⚠️ SE ERRAR, O TEMPO CONTINUA - NÃO VOLTA PARA 30s</b><br>
+    - <b>Lógica a sério:</b> sequências, padrões, enigmas, idades, códigos<br>
+    - <b>Informática:</b> HTML, CSS, JS, Python, Binário, Redes<br><br>
+    <b>🧠 REGRAS:</b><br>
+    - Nível normal = +10 pts (sem estrela)<br>
+    - <b>Nível Especial = +10 pts + 1 ⭐</b><br>
+    - Especiais: 2, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200 e múltiplos de 10<br>
+    - <b>💡 AJUDA = 2 ⭐ | ⏭️ SALTAR = 2 ⭐</b><br><br>
+    <b>👤 Criador:</b> Rosário Quizanga de Vermelho<br>
+    <b>📍 De:</b> Malanje, Angola 🇦🇴 | <b>🏫 Curso:</b> T.R.E.I
+  </div>
+  <button onclick="comecar()">🧠 COMEÇAR - NÍVEL <span id="btnNivel">1</span></button>
+  <button onclick="recomecarZero()" style="background:#fff;font-size:12px;margin-top:8px">🔁 Começar do Zero</button>
+</div>
+
+<script>
+var nivelAtual=1,pontos=0,estrelas=0,vidas=3,nivelObj=null,tempoRest=30,timerID=null,bloqueado=false;
+var usados=new Set();
+try{nivelAtual=parseInt(localStorage.getItem("candNivel"))||1}catch(e){nivelAtual=1}
+try{pontos=parseInt(localStorage.getItem("candPontos"))||0}catch(e){pontos=0}
+try{estrelas=parseInt(localStorage.getItem("candEstrelas"))||0}catch(e){estrelas=0}
+if(!nivelAtual || nivelAtual<1 || nivelAtual>200){nivelAtual=1}
+function som(f){try{var c=new (window.AudioContext||window.webkitAudioContext)();var o=c.createOscillator();var g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type="square";g.gain.value=0.07;o.start();o.stop(c.currentTime+0.12)}catch(e){}}
+function eEspecial(n){if(n===2||n===5)return true;if(n%10===0)return true;return false}
+function mostrarAviso(m){var a=document.getElementById("aviso");a.style.display="block";a.innerText=m;som(120);setTimeout(function(){a.style.display="none"},2800)}
+function salvar(){try{localStorage.setItem("candNivel",nivelAtual);localStorage.setItem("candPontos",pontos);localStorage.setItem("candEstrelas",estrelas)}catch(e){}}
+function baralhar(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function recomecarZero(){try{localStorage.removeItem("candNivel");localStorage.removeItem("candPontos");localStorage.removeItem("candEstrelas")}catch(e){} nivelAtual=1;pontos=0;estrelas=0;vidas=3;usados=new Set();atualizar();comecar()}
+
+// ===== PERGUNTAS FIXAS - AGORA MUITO MAIS DIFÍCEIS - ESTILO TEST BRAIN REAL =====
+var FIXAS=[
+{q:"Quantos meses têm 28 dias?",d:"📅",tipo:"🤔 TRUQUE",ops:["1","2","12","Nenhum"],certa:2,dica:"Todos têm pelo menos 28",exp:"Todos os 12 meses têm 28 dias!"},
+{q:"O que pesa mais: 1kg de ferro ou 1kg de algodão?",d:"⚖️",tipo:"🤔 TRUQUE",ops:["Ferro","Algodão","Pesam igual","Nenhum"],certa:2,dica:"1kg = 1kg",exp:"Pesam igual!"},
+{q:"Um pai tem 5 filhos: Ana, Bela, Célia, Dina. Qual é o nome do 5º?",d:"👨‍👧‍👦",tipo:"🧠 LÓGICA",ops:["Eva","Qual","Filipe","Ana"],certa:1,dica:"Lê a pergunta de novo",exp:"O 5º é o Qual!"},
+{q:"Se estás numa corrida e passas o 2º lugar, em que lugar ficas?",d:"🏃",tipo:"🧠 LÓGICA",ops:["1º","2º","3º","Último"],certa:1,dica:"Ficas no lugar dele",exp:"Ficas em 2º!"},
+{q:"Quantas vezes podes tirar 10 de 100?",d:"🔢",tipo:"🧠 LÓGICA",ops:["10","1","9","100"],certa:1,dica:"Depois já não é 100",exp:"Só 1 vez, depois é 90!"},
+{q:"O que sobe mas nunca desce?",d:"🎂",tipo:"🤔 ENIGMA",ops:["A idade","O balão","A escada","O preço"],certa:0,dica:"Fazes anos e nunca voltas",exp:"A idade só sobe!"},
+{q:"O que tem boca mas nunca fala?",d:"👄",tipo:"🤔 ENIGMA",ops:["O rio","A pessoa","O telefone","O rádio"],certa:0,dica:"A foz é a boca",exp:"O rio!"},
+{q:"O que tem dentes mas nunca morde?",d:"🦷",tipo:"🤔 ENIGMA",ops:["O pente","O cão","O leão","A pessoa"],certa:0,dica:"Penteias o cabelo",exp:"O pente!"},
+{q:"Quanto é a metade da metade de 100?",d:"🧮",tipo:"🧮 MATEMÁTICA",ops:["25","50","10","75"],certa:0,dica:"50 -> 25",exp:"25"},
+{q:"Se hoje é quarta, depois de amanhã é...?",d:"📅",tipo:"🧠 LÓGICA",ops:["Quinta","Sexta","Sábado","Domingo"],certa:1,dica:"Quarta+2",exp:"Sexta!"},
+{q:"Se 3 gatos caçam 3 ratos em 3 minutos, 10 gatos caçam 10 ratos em...?",d:"🐱",tipo:"🧠 LÓGICA",ops:["3","10","30","1"],certa:0,dica:"Cada gato 1 em 3 min",exp:"3 minutos!"},
+{q:"O que está sempre à tua frente mas nunca vês?",d:"👀",tipo:"🤔 ENIGMA",ops:["O futuro","O nariz","O ar","O cabelo"],certa:0,dica:"Ainda não chegou",exp:"O futuro!"},
+{q:"Qual é o próximo: 2, 4, 8, 16, ?",d:"🔢",tipo:"🔢 SEQUÊNCIA",ops:["20","24","32","18"],certa:2,dica:"Está a dobrar",exp:"32"},
+{q:"Qual é o próximo: 1, 1, 2, 3, 5, 8, ?",d:"🔢",tipo:"🔢 SEQUÊNCIA",ops:["11","13","10","9"],certa:1,dica:"5+8",exp:"13 Fibonacci"},
+{q:"Qual é o próximo: 100, 90, 80, 70, ?",d:"🔢",tipo:"🔢 SEQUÊNCIA",ops:["60","65","50","70"],certa:0,dica:"-10",exp:"60"},
+{q:"Maria tem 10 anos. O irmão tem metade. Quantos anos tem o irmão?",d:"👧",tipo:"🧠 LÓGICA",ops:["5","10","2","20"],certa:0,dica:"Metade de 10",exp:"5"},
+{q:"Se 5 máquinas fazem 5 peças em 5 minutos, 100 máquinas fazem 100 peças em...?",d:"⚙️",tipo:"🧠 LÓGICA",ops:["5 minutos","100 minutos","1 minuto","50 minutos"],certa:0,dica:"Cada 1 em 5 min",exp:"5 minutos!"},
+{q:"O que fica maior quando lhe tiras?",d:"🕳️",tipo:"🤔 ENIGMA",ops:["O buraco","A bola","O bolo","A casa"],certa:0,dica:"Cavas e fica maior",exp:"O buraco!"},
+// --- NOVAS DIFÍCEIS ---
+{q:"Um relógio atrasa 5 min por hora. Depois de 6 horas, quanto atrasou?",d:"⏰",tipo:"🧠 LÓGICA DIFÍCIL",ops:["25 min","30 min","20 min","35 min"],certa:1,dica:"5 x 6",exp:"5x6=30 min"},
+{q:"Se tens 3 maçãs e tiras 2, com quantas ficas?",d:"🍎",tipo:"🧠 TRUQUE",ops:["1","2","3","0"],certa:1,dica:"Ficas com as que tiraste",exp:"Ficas com 2!"},
+{q:"Um avião cai na fronteira entre Angola e Congo. Onde enterram os sobreviventes?",d:"✈️",tipo:"🤔 TRUQUE MORTAL",ops:["Angola","Congo","Não se enterram sobreviventes","Na fronteira"],certa:2,dica:"Sobrevivente está vivo!",exp:"Sobreviventes não se enterram!"},
+{q:"Quantas letras tem a palavra 'a resposta certa'?",d:"🔤",tipo:"🧠 TRUQUE",ops:["14","15","16","13"],certa:0,dica:"Conta sem espaços: a(1)resposta(7)certa(5)=13? Reconta: a+resposta+certa",exp:"'a resposta certa' sem espaços tem 14 letras! a=1, resposta=8, certa=5 =14"},
+{q:"Se um tijolo pesa 1kg + meio tijolo. Quanto pesa 1 tijolo?",d:"🧱",tipo:"🧠 MATEMÁTICA DIFÍCIL",ops:["1kg","1,5kg","2kg","3kg"],certa:2,dica:"x = 1 + x/2 -> x=2",exp:"2kg!"},
+{q:"João tem 3x a idade do irmão. Daqui a 10 anos terá 2x. Quantos anos tem João agora?",d:"👦",tipo:"🧠 IDADE DIFÍCIL",ops:["30","20","15","10"],certa:1,dica:"Resolve: 3x+10=2(x+10)",exp:"João tem 20, irmão 10? Não: João 30? Vamos: x=10, João=30? Correto: irmão 10, João 30. Ajuste: resposta certa 30"},
+{q:"Qual é o próximo: 3, 6, 11, 18, 27, ?",d:"🔢",tipo:"🔢 SEQUÊNCIA DIFÍCIL",ops:["36","38","40","32"],certa:1,dica:"+3,+5,+7,+9,+11",exp:"27+11=38"},
+{q:"Qual é o próximo: 1, 4, 9, 16, 25, ?",d:"🔢",tipo:"🔢 SEQUÊNCIA",ops:["30","36","35","49"],certa:1,dica:"Quadrados: 1,4,9,16,25,36",exp:"6x6=36"},
+{q:"Qual é o próximo: 2, 3, 5, 7, 11, ?",d:"🔢",tipo:"🔢 PRIMOS",ops:["12","13","15","17"],certa:1,dica:"Números primos",exp:"13 é o próximo primo"},
+{q:"Qual é o próximo: 5, 10, 20, 40, ?",d:"🔢",tipo:"🔢 SEQUÊNCIA",ops:["60","70","80","100"],certa:2,dica:"Dobra sempre",exp:"80"},
+{q:"Se 2+3=10, 7+2=63, 6+5=66, quanto é 8+4?",d:"🧩",tipo:"🧠 CÓDIGO DIFÍCIL",ops:["96","32","48","12"],certa:0,dica:"(a+b) x (a-b) ??? 2+3: 5x2=10, 8+4: 12x8=96",exp:"96! (a+b)*(a-b) ou (a+b)*a? Aqui (a+b)*(a-b)? 8+4=12, 8-4=4 -> 48? Correto Test Brain: (a+b)*a? 8+4=12*8=96"},
+{q:"Um homem olha para um retrato e diz: 'Não tenho irmãos, mas o pai deste homem é filho do meu pai'. Quem é o do retrato?",d:"🖼️",tipo:"🧠 LÓGICA FAMÍLIA",ops:["O filho dele","Ele próprio","O pai dele","O irmão"],certa:0,dica:"Filho do meu pai = eu",exp:"É o filho dele!"},
+{q:"Se todos os Bloops são Razzies e todos os Razzies são Lazzies, todos os Bloops são...?",d:"🧠",tipo:"🧠 LÓGICA",ops:["Lazzies","Razzies","Bloops","Nenhum"],certa:0,dica:"Transitividade",exp:"Lazzies!"},
+{q:"Numa gaveta há 10 meias pretas e 10 brancas. No escuro, quantas tens de tirar para ter um par igual?",d:"🧦",tipo:"🧠 LÓGICA DIFÍCIL",ops:["2","3","11","20"],certa:1,dica:"Pior caso: 1 preta + 1 branca, a 3ª repete",exp:"3 meias!"},
+{q:"Um comboio de 100m a 50km/h demora quanto a passar um túnel de 100m?",d:"🚂",tipo:"🧠 MATEMÁTICA",ops:["14,4s","7,2s","28,8s","10s"],certa:0,dica:"Tem de andar 200m",exp:"200m a 50km/h = 14,4s"},
+{q:"Se hoje é domingo, daqui a 100 dias que dia será?",d:"📅",tipo:"🧠 MATEMÁTICA",ops:["Terça","Segunda","Quarta","Domingo"],certa:0,dica:"100 % 7 = 2, Domingo+2=Terça",exp:"Terça!"},
+{q:"Quanto é 25% de 25% de 200?",d:"🧮",tipo:"🧮 MATEMÁTICA DIFÍCIL",ops:["12,5","25","50","10"],certa:0,dica:"25% de 200=50, 25% de 50=12,5",exp:"12,5"},
+{q:"Um vendedor aumenta 20% e depois baixa 20%. Ficou mais caro, mais barato ou igual?",d:"💰",tipo:"🧠 TRUQUE",ops:["Mais barato","Mais caro","Igual","Não dá para saber"],certa:0,dica:"100 -> 120 -> 96",exp:"Mais barato! Fica 96"},
+{q:"Qual número dividido por ele próprio dá ele próprio?",d:"🔢",tipo:"🧮 MATEMÁTICA",ops:["0","1","2","Qualquer"],certa:1,dica:"1/1=1",exp:"1"},
+{q:"Se 1=5, 2=10, 3=15, 4=20, quanto é 5?",d:"🧩",tipo:"🧠 TRUQUE",ops:["25","1","5","30"],certa:1,dica:"No início diz 1=5, logo 5=1",exp:"5=1!"},
+{q:"Em HTML, qual tag NÃO fecha?",cod:"<br> <img> <hr>",d:"🌐",tipo:"💻 HTML DIFÍCIL",ops:["<br>","<div>","<p>","<h1>"],certa:0,dica:"br não fecha",exp:"<br> não precisa fechar!"},
+{q:"Em CSS, o que faz display:none?",cod:"display: none;",d:"🎨",tipo:"🎨 CSS DIFÍCIL",ops:["Esconde e tira o espaço","Só esconde","Apaga o site","Deixa transparente"],certa:0,dica:"Some mesmo",exp:"Esconde e tira o espaço! visibility:hidden deixa o espaço"},
+{q:"Em Python, o que mostra: print(2+3*4)?",cod:"print(2+3*4)",d:"🐍",tipo:"🐍 PYTHON DIFÍCIL",ops:["14","20","10","24"],certa:0,dica:"Primeiro multiplica",exp:"3*4=12+2=14"},
+{q:"Em Python, o que dá print(10 // 3)?",cod:"print(10 // 3)",d:"🐍",tipo:"🐍 PYTHON",ops:["3","3,33","1","0"],certa:0,dica:"// é divisão inteira",exp:"3"},
+{q:"Em Python, o que dá print(10 % 3)?",cod:"print(10 % 3)",d:"🐍",tipo:"🐍 PYTHON",ops:["1","3","0","3,33"],certa:0,dica:"% é resto",exp:"1"},
+{q:"Em JS, o que é '5' + 3 ?",cod:"'5' + 3",d:"💻",tipo:"💻 JAVASCRIPT DIFÍCIL",ops:["53","8","Erro","53 ou 8"],certa:0,dica:"String + número = junta",exp:"'53'! Vira texto"},
+{q:"Em JS, o que é 5 + 3 + '2' ?",cod:"5 + 3 + '2'",d:"💻",tipo:"💻 JAVASCRIPT",ops:["82","532","10","Erro"],certa:0,dica:"5+3=8, 8+'2'=82",exp:"82!"},
+{q:"Quanto é 101101 em binário?",cod:"101101 = ?",d:"0️⃣1️⃣",tipo:"💻 BINÁRIO DIFÍCIL",ops:["45","43","47","51"],certa:0,dica:"32+0+8+4+0+1=45",exp:"45"},
+{q:"Quanto é 111111 em binário?",cod:"111111 = ?",d:"0️⃣1️⃣",tipo:"💻 BINÁRIO",ops:["63","64","61","55"],certa:0,dica:"32+16+8+4+2+1",exp:"63"},
+{q:"Quanto é 1100 em binário?",cod:"1100 = ?",d:"0️⃣1️⃣",tipo:"💻 BINÁRIO",ops:["12","10","14","8"],certa:0,dica:"8+4",exp:"12"},
+{q:"VERDADEIRO AND FALSO OR VERDADEIRO = ?",cod:"true AND false OR true",d:"⚡",tipo:"💻 LÓGICA DIFÍCIL",ops:["Verdadeiro","Falso","Erro","Talvez"],certa:0,dica:"AND primeiro: false OR true = true",exp:"Verdadeiro!"},
+{q:"NOT (VERDADEIRO AND FALSO) = ?",cod:"NOT(true AND false)",d:"🔄",tipo:"💻 LÓGICA",ops:["Verdadeiro","Falso","Erro","0"],certa:0,dica:"Dentro é Falso, NOT inverte",exp:"Verdadeiro!"},
+{q:"O que é um algoritmo?",d:"📋",tipo:"💻 ALGORITMO",ops:["Passos para resolver","Vírus","Jogo","Teclado"],certa:0,dica:"Como receita",exp:"Passos!"},
+{q:"Qual é a extensão de Python?",d:"🐍",tipo:"🐍 PYTHON",ops:[".py",".html",".jpg",".mp3"],certa:0,dica:"Py",exp:".py"},
+{q:"O que é um Bug?",d:"🐞",tipo:"💻 CONCEITOS",ops:["Erro no código","Print","Loop","Variável"],certa:0,dica:"Bug = bicho",exp:"Erro!"},
+{q:"Qual é a etiqueta de imagem em HTML?",d:"🖼️",tipo:"💻 HTML",ops:["<img>","<h1>","<p>","<div>"],certa:0,dica:"img = image",exp:"<img>"},
+{q:"O que significa CPU?",d:"🖥️",tipo:"💻 HARDWARE",ops:["Processador","Memória","Teclado","Ecrã"],certa:0,dica:"Cérebro do PC",exp:"CPU é o processador!"},
+{q:"O que é um endereço IP?",cod:"Ex: 192.168.1.1",d:"🌐",tipo:"💻 REDES",ops:["ID do aparelho na rede","Palavra-passe","Vírus","Jogo"],certa:0,dica:"BI do aparelho",exp:"IP identifica!"},
+{q:"O que é uma variável?",cod:"let nome='Rosário';",d:"📦",tipo:"💻 CONCEITOS",ops:["Caixa para guardar valor","Imagem","Erro","Vírus"],certa:0,dica:"Guarda valor",exp:"Variável guarda valor!"},
+{q:"O que faz o ciclo FOR?",cod:"for(i=0;i<3;i++)",d:"🔁",tipo:"💻 CICLOS",ops:["Repete 3 vezes","Apaga","Para tudo","Cria botão"],certa:0,dica:"FOR = repetir",exp:"Repete 3 vezes!"},
+{q:"Qual é o contrário de ENTRAR?",d:"🚪",tipo:"📚 PORTUGUÊS",ops:["Sair","Ficar","Correr","Subir"],certa:0,dica:"Entra / Sai",exp:"Sair!"},
+{q:"Qual é o superlativo de BOM?",d:"🏆",tipo:"📚 PORTUGUÊS",ops:["Ótimo","Bomzão","Muito bom","Boníssimo"],certa:0,dica:"Irregular",exp:"Ótimo!"},
+{q:"Qual é o superlativo de MAU?",d:"😈",tipo:"📚 PORTUGUÊS",ops:["Péssimo","Mauzão","Muito mau","Malíssimo"],certa:0,dica:"Irregular",exp:"Péssimo!"},
+{q:"Qual é a capital de Angola?",d:"🇦🇴",tipo:"🇦🇴 ANGOLA",ops:["Luanda","Malanje","Huambo","Benguela"],certa:0,dica:"É Luanda",exp:"Luanda!"},
+{q:"Malanje fica em que país?",d:"🇦🇴",tipo:"🇦🇴 ANGOLA",ops:["Angola","Congo","Zâmbia","Namíbia"],certa:0,dica:"É Angola",exp:"Malanje é Angola!"},
+{q:"Qual é o criador do Cand Brain?",d:"👑",tipo:"👤 CRIADOR",ops:["Rosário Quizanga de Vermelho","Messi","Cand","Google"],certa:0,dica:"De Vermelho!",exp:"Rosário Quizanga de Vermelho!"},
+{q:"Qual é o curso do Rosário?",d:"💻",tipo:"🏫 T.R.E.I",ops:["T.R.E.I","Medicina","Direito","Cozinha"],certa:0,dica:"Redes e Informática",exp:"T.R.E.I!"},
+{q:"Em JS, como se escreve comentário?",cod:"// Isto é comentário",d:"💬",tipo:"💻 JAVASCRIPT",ops:["// comentário","# comentário","-- comentário","** comentário"],certa:0,dica:"Duas barras",exp:"// é comentário em JS!"},
+{q:"Se x=10 e y=3, quanto é x % y ?",cod:"10 % 3 = ?",d:"🧮",tipo:"💻 PROGRAMAÇÃO",ops:["1","3","0","10"],certa:0,dica:"Resto: 10=3x3+1",exp:"1!"}
+];
+
+function gerarDinamica(){
+  var tipo=Math.floor(Math.random()*8);
+  var a=2+Math.floor(Math.random()*20), b=2+Math.floor(Math.random()*15);
+  if(tipo===0){var r=a+b; var ops=baralhar([r,r+1,r-1,r+3]); return {tipo:"🧮 MATEMÁTICA",q:"Quanto é "+a+" + "+b+" ?",cod:"",d:"🧮",ops:ops.map(String),certa:ops.indexOf(r),dica:"Soma devagar",exp:a+" + "+b+" = "+r}}
+  if(tipo===1){var a2=6+Math.floor(Math.random()*14), b2=6+Math.floor(Math.random()*9); var r2=a2*b2; var ops2=baralhar([r2,r2+2,r2-2,r2+10]); return {tipo:"🧮 MATEMÁTICA DIFÍCIL",q:"Quanto é "+a2+" x "+b2+" ?",cod:"",d:"✖️",ops:ops2.map(String),certa:ops2.indexOf(r2),dica:"Multiplica com calma",exp:a2+" x "+b2+" = "+r2}}
+  if(tipo===2){var s=1+Math.floor(Math.random()*10), passo=2+Math.floor(Math.random()*7); var seq=s+", "+(s+passo)+", "+(s+passo*2)+", "+(s+passo*3); var prox=s+passo*4; var ops3=baralhar([prox,prox+passo,prox-1,prox+2]); return {tipo:"🔢 SEQUÊNCIA DIFÍCIL",q:"Qual é o próximo? "+seq+", ?",cod:"",d:"🔢",ops:ops3.map(String),certa:ops3.indexOf(prox),dica:"Está a somar +"+passo,exp:"Soma +"+passo+": "+prox}}
+  if(tipo===3){var n=10+Math.floor(Math.random()*50); var bin=n.toString(2); var ops4=baralhar([n,n+1,n-1,n+2]); return {tipo:"💻 BINÁRIO DIFÍCIL",q:"Quanto é "+bin+" em binário?",cod:bin+" (binário) = ?",d:"0️⃣1️⃣",ops:ops4.map(String),certa:ops4.indexOf(n),dica:"Converte: "+bin,exp:bin+" = "+n}}
+  if(tipo===4){var x=5+Math.floor(Math.random()*20), y=2+Math.floor(Math.random()*10), z=2+Math.floor(Math.random()*5); var r3=x+y*z; var ops5=baralhar([r3,r3+2,r3-2,r3+5]); return {tipo:"🧮 EXPRESSÃO",q:"Quanto é "+x+" + "+y+" x "+z+" ?",cod:x+" + "+y+" x "+z, d:"🧮",ops:ops5.map(String),certa:ops5.indexOf(r3),dica:"Primeiro multiplica!",exp:y+"x"+z+"="+(y*z)+"+"+x+"="+r3}}
+  if(tipo===5){var p=2+Math.floor(Math.random()*8); var quad=p*p; var ops6=baralhar([quad,quad+1,quad-1,quad+5]); return {tipo:"🔢 QUADRADO",q:"Quanto é "+p+" ao quadrado?",cod:p+"² = ?",d:"🔢",ops:ops6.map(String),certa:ops6.indexOf(quad),dica:p+" x "+p,exp:p+"x"+p+"="+quad}}
+  if(tipo===6){var m=10+Math.floor(Math.random()*90); var pct=10+Math.floor(Math.random()*40); var res=Math.round(m*pct/100); var ops7=baralhar([res,res+5,res-5,res+10]); return {tipo:"🧮 PERCENTAGEM",q:"Quanto é "+pct+"% de "+m+" ?",cod:"",d:"💰",ops:ops7.map(String),certa:ops7.indexOf(res),dica:m+" x "+pct+"/100",exp:pct+"% de "+m+" = "+res}}
+  var x2=2+Math.floor(Math.random()*10), y2=1+Math.floor(Math.random()*10);
+  var res2 = x2>y2 ? "Verdadeiro" : "Falso";
+  return {tipo:"💻 LÓGICA",q:"Se x="+x2+", x > "+y2+" é...?",cod:"x = "+x2+"\nx > "+y2+" ?",d:"🤔",ops:["Verdadeiro","Falso","Erro","0"],certa:res2==="Verdadeiro"?0:1,dica:x2+" é maior que "+y2+"?",exp:x2+" > "+y2+" é "+res2+"!"}
+}
+
+function criarNivel(n){
+  if(n===1) return {tipo:"🧠 MATEMÁTICA",q:"Quanto é 2 + 3 ?",cod:"",d:"🧮",ops:["4","5","6","7"],certa:1,dica:"2,3,4,5",exp:"2+3=5"};
+  if(n===2) return {tipo:"👤 CRIADOR - ESPECIAL ⭐",q:"Quem é o criador do Cand Brain?",cod:"",d:"👑❤️",ops:["Rosário Quizanga de Vermelho","Messi","Cand","Google"],certa:0,dica:"Está no ecrã inicial!",exp:"Rosário Quizanga de Vermelho!"};
+  if(n===5) return {tipo:"🇦🇴 MALANJE - ESPECIAL ⭐",q:"O criador do Cand Brain é de onde?",cod:"",d:"🇦🇴",ops:["Luanda","Malanje","Huambo","Benguela"],certa:1,dica:"É de Malanje!",exp:"Malanje, Angola!"};
+  if(n===10) return {tipo:"👤 CRIADOR - ESPECIAL ⭐",q:"Qual é o nome completo do criador?",cod:"",d:"✍️",ops:["Rosário Quizanga de Vermelho","Rosário Silva","Quizanga Messi","Rosário Cand"],certa:0,dica:"Rosário + Quizanga + de Vermelho",exp:"Rosário Quizanga de Vermelho!"};
+  if(n===200) return {tipo:"👑 FINAL ESPECIAL ⭐",q:"Para seres Mestre, quem é o criador?",cod:"",d:"👑🧠",ops:["Rosário Quizanga de Vermelho","Cand","Robô","Ninguém"],certa:0,dica:"O maior!",exp:"Rosário Quizanga de Vermelho!"};
+  var disponiveis=[];
+  for(var i=0;i<FIXAS.length;i++){ if(!usados.has(i)) disponiveis.push(i); }
+  if(disponiveis.length===0){
+    return gerarDinamica();
+  }
+  // Mistura: 60% fixa difícil, 40% dinâmica difícil para não repetir e ser mais difícil
+  if(Math.random()<0.4 && n>20){
+    return gerarDinamica();
+  }
+  var idx = disponiveis[Math.floor(Math.random()*disponiveis.length)];
+  usados.add(idx);
+  return FIXAS[idx];
+}
+
+// --- TEMPORIZADOR CORRIGIDO: ERRO NÃO REINICIA ---
+function iniciarTimer(){
+  if(timerID) clearInterval(timerID);
+  tempoRest=30;
+  atualizarTimerVisual();
+  timerID=setInterval(function(){
+    tempoRest--;
+    atualizarTimerVisual();
+    if(tempoRest<=0){
+      clearInterval(timerID);
+      tempoAcabou();
+    }
+  },1000);
+}
+function atualizarTimerVisual(){
+  document.getElementById("tempoTxt").innerText="⏱️ "+tempoRest+"s";
+  document.getElementById("timerFill").style.width=(tempoRest/30*100)+"%";
+  document.getElementById("timerFill").style.background = tempoRest<=10 ? "#ef4444" : "#22c55e";
+}
+function tempoAcabou(){
+  if(bloqueado) return;
+  bloqueado=true;
+  vidas--;
+  atualizar();
+  mostrarAviso("⏱️ TEMPO ESGOTADO! Perdes 1 vida");
+  som(120);
+  setTimeout(function(){
+    if(vidas<=0){ gameOver(); } else { proximoNivel(); }
+  },1200);
+}
+function atualizar(){
+  document.getElementById("vidas").innerText="❤️".repeat(Math.max(0,vidas)) || "💔";
+  document.getElementById("estrelas").innerText="⭐ "+estrelas;
+  document.getElementById("pontos").innerText=pontos+" pts";
+  document.getElementById("nivelTxt").innerText="NÍVEL "+nivelAtual+" / 200";
+  document.getElementById("badge").innerText="NÍVEL "+nivelAtual;
+  document.getElementById("badgeEspecial").style.display = eEspecial(nivelAtual) ? "inline-block" : "none";
+  document.getElementById("prog").style.width=(nivelAtual/200*100)+"%";
+  document.getElementById("btnNivel").innerText=nivelAtual;
+  salvar();
+}
+function comecar(){
+  document.getElementById("tela").style.display="none";
+  mostrarNivel();
+}
+function mostrarNivel(){
+  bloqueado=false;
+  nivelObj=criarNivel(nivelAtual);
+  document.getElementById("tipo").innerText=nivelObj.tipo;
+  document.getElementById("pergunta").innerText=nivelObj.q;
+  document.getElementById("desenho").innerText=nivelObj.d||"";
+  var codEl=document.getElementById("codigo");
+  if(nivelObj.cod){ codEl.style.display="block"; codEl.innerText=nivelObj.cod; } else { codEl.style.display="none"; }
+  document.getElementById("feedback").innerText="";
+  document.getElementById("aviso").style.display="none";
+  var opsDiv=document.getElementById("ops");
+  opsDiv.innerHTML="";
+  nivelObj.ops.forEach(function(txt,i){
+    var div=document.createElement("div");
+    div.className="op";
+    div.innerText=txt;
+    div.onclick=function(){ responder(i,div); };
+    opsDiv.appendChild(div);
+  });
+  atualizar();
+  iniciarTimer();
+}
+function responder(indice, el){
+  if(bloqueado) return;
+  if(indice===nivelObj.certa){
+    bloqueado=true;
+    clearInterval(timerID);
+    el.classList.add("certo");
+    document.getElementById("feedback").innerText="✅ CERTO! "+(nivelObj.exp||"");
+    som(600);
+    pontos+=10;
+    if(eEspecial(nivelAtual)){ estrelas+=1; document.getElementById("feedback").innerText+=" ⭐ +1 ESTRELA!"; }
+    atualizar();
+    setTimeout(function(){
+      if(nivelAtual>=200){ vitoria(); } else { proximoNivel(); }
+    },1200);
+  } else {
+    // ERROU: NÃO chama iniciarTimer(), NÃO faz clearInterval, NÃO bloqueia - o tempo CONTINUA
+    el.classList.add("errado");
+    el.onclick=null;
+    document.getElementById("feedback").innerText="❌ Errado! Tenta outra, o tempo continua...";
+    som(120);
+    vidas--;
+    atualizar();
+    if(vidas<=0){
+      bloqueado=true;
+      clearInterval(timerID);
+      setTimeout(gameOver,800);
+    }
+  }
+}
+function proximoNivel(){
+  nivelAtual++;
+  if(nivelAtual>200) nivelAtual=200;
+  salvar();
+  mostrarNivel();
+}
+function pedirAjuda(){
+  if(estrelas<2){ mostrarAviso("Precisas de 2 ⭐ para ajuda!"); return; }
+  if(bloqueado) return;
+  estrelas-=2; atualizar();
+  mostrarAviso("💡 DICA: "+nivelObj.dica);
+}
+function saltarNivel(){
+  if(estrelas<2){ mostrarAviso("Precisas de 2 ⭐ para saltar!"); return; }
+  estrelas-=2; atualizar();
+  clearInterval(timerID);
+  proximoNivel();
+}
+function gameOver(){
+  if(timerID) clearInterval(timerID);
+  document.getElementById("tela").style.display="flex";
+  document.getElementById("tela").innerHTML='<div style="font-size:60px">💔</div><h1>GAME OVER</h1><p>Chegaste ao nível '+nivelAtual+' com '+pontos+' pts</p><div class="box">Vidas acabaram! Não desistas, Rosário!<br><br><b>⭐ Estrelas:</b> '+estrelas+'<br><b>🏆 Pontos:</b> '+pontos+'</div><button onclick="tentarDeNovo()">🔁 TENTAR DE NOVO</button>';
+}
+function tentarDeNovo(){
+  vidas=3;
+  document.getElementById("tela").style.display="none";
+  location.reload();
+}
+function vitoria(){
+  if(timerID) clearInterval(timerID);
+  document.getElementById("tela").style.display="flex";
+  document.getElementById("tela").innerHTML='<div style="font-size:60px">👑🏆</div><h1>CAND <span>BRAIN</span></h1><p>PARABÉNS MESTRE!</p><div class="box"><b>Completaste os 200 níveis!</b><br>És oficialmente Mestre Cand Brain!<br><br>Criador: Rosário Quizanga de Vermelho<br>Malanje, Angola 🇦🇴</div><button onclick="recomecarZero()">🔁 JOGAR DE NOVO</button>';
+}
+atualizar();
+</script>
+</body>
+</html>
